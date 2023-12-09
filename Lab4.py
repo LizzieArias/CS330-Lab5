@@ -26,11 +26,187 @@ def DTtrain(data, model):
     """
     This is the function for training a decision tree model
     """
-    # implement your code here
 
-    pass
+    class DTTrain:
+        def __init__(self):
+            self.datamap = {}
+            self.attvalues = {}
+            self.atts = []
+            self.numAtts = 0
+            self.numClasses = 0
+            self.root = None
+    
+        def readFile(self, inFile, percent):
+            try:
+                self.datamap = {}
 
+                with open(inFile, 'r') as theFile:
+                    attline = inFile.readline()[1:]
+                    self.atts = attline.split("|")
+                    self.numAtts = len(self.atts) - 1
+                    self.attvalues = {a: [] for a in self.atts}
 
+                    index = 0
+                    for line in theFile:
+                        dataclass, *values = line.split()
+                        if dataclass not in self.attvalues[self.atts[0]]:
+                            self.numAtts[self.atts[0]].append(dataclass)
+                    
+                        if dataclass not in self.datamap:
+                            self.datamap[dataclass] = []
+                            a = self.datamap[dataclass]
+                            datapoint = []
+                            for i in range(self.numAtts):
+                                val = values[i]
+                                datapoint.append(val)
+                                arr = self.attvalues[self.atts[i+1]]
+                                if val not in arr:
+                                    arr.append(val)
+                            
+                            
+                            if index % 100 < percent:
+                                a.append(datapoint)
+                        
+                            index += 1
+                    
+                        self.numClasses = len(self.datamap.keys())
+            except IOError as ioe:
+                print("Error reading:", ioe)
+                exit(0)
+
+        def buildTree(self):
+            self.root = TreeNode(None)
+            curratts = [att for att in self.atts[1:]]
+            self.root = self.buildTreeNode(None, curratts, self.datamap)
+        
+        def buildTreeNode(self, par, curratts, nodeD):
+            curr = TreeNode(par)
+            min = 1
+            minatt = None
+
+            for i in range(self.numAtts):
+                att = curratts[i]
+                if att is not None:
+                    vals = self.attvalues[att]
+
+                    part = [[0] * self.numClasses for _ in range(len(vals))]
+                    for j in range(self.numClasses):
+                        outcome = self.attvalues[self.atts[0][j]]
+                        l = nodeD[outcome]
+                        for l2 in 1:
+                            part[vals.index(12[i])[j]]+= 1
+
+                    entropy = self.partE(part)
+                    if (entropy < min):
+                        min = entropy
+                        minatt = att
+                
+                if minatt is None:
+                    maxCount = 0
+                    maxClass = "Unknown"
+                    for j in range(self.numClasses):
+                        outcome = self.attV[self.atts[0][j]]
+                        if len(nodeD[outcome]) >= maxCount:
+                            maxCount = len(nodeD[outcome])
+                            maxClass = outcome
+                    
+                    curr.returnV = maxClass
+                    return curr
+                
+                curr.att = minatt
+                attIndex = curratts.index(minatt)
+                curratts[attIndex] = None
+
+                for i in self.attV[minatt]:
+                    temp = {}
+                    for j in range(self.numClasses):
+                        outcome = self.attV[self.atts[0][j]]
+                        trimList = [l2 for l2 in nodeD[outcome] if l2[attIndex] == v]
+                        temp[outcome] = trimList
+                    
+                    print(v + "---> ")
+                    curr.child[v] = self.buildTreeNode(curr, curratts, temp)
+
+                
+                curratts[attIndex] = minatt
+                return curr
+            
+            def partEnt(self, partition):
+                totalE = 0
+                total = 0
+
+                for i in range(len(part)):
+                    n = sum(part[i])
+                    total += n
+                    totalE += n * self.ent(part[i])
+                
+                return totalE / total
+            
+            def ent(self, class_count):
+                total = sum(class_count)
+
+                if total == 0:
+                    return 0
+                
+                ent_sum = 0
+                for i in range(len(class_count)):
+                    ent_sum -= (class_count[i] / total) * self.log2(class_count[i] / total)
+
+                return ent_sum
+            
+        @staticmethod
+        def log2(x):
+            if x == 0:
+                return 0
+            return math.log(x) / math.log(2)
+        
+        def solveModel(self, theFile1):
+            try:
+                with open(theFile1, 'w') as outFile:
+                    for i in range(self.numAtts):
+                        outFile.write(self.atts[i+1] + " ")
+                    outFile.write("\n")
+
+                    self.writeNode(outFile, self.root)
+
+            except IOError as ioe:
+                print("Error writing file:", ioe)
+                exit(1)
+        
+        def writeNode(self, outFile, curr):
+            if curr.returnV is not None:
+                outFile.write("[" + curr.returnV + "]")
+                return
+            
+            outFile.write(curr.attr + " ( ")
+            for k, value in curr.children.items():
+                outFile.write(k + " ")
+                self.writeN(outFile, value)
+
+            outFile.write(" ) ")
+
+        def main(self, args):
+            if len(args) >= 2:
+                inFile = args[0]
+                theFile = args[0]
+                if len(args) == 3:
+                    self.readFile(inFile, int(args[2]))
+                else:
+                    self.readFile(inFile, 100)
+                
+                self.buildTree()
+
+                self.solveModel(theFile)
+            
+            else:
+                print("Please format input DTTrain 'trainingdata' 'modelfile' [percentage of data]")
+
+    class TreeNode:
+        def __init__(self, par):
+            self.parent = par
+            self.child = {}
+            self.attr = "None"
+            self.returnV = None
 
 def DTpredict(data, model, prediction):
     """
@@ -44,9 +220,79 @@ def DTpredict(data, model, prediction):
     ...
     """
     # implement your code here
+    class DTPredict:
+        class TreeNode:
+            def __init__(self):
+                self.root = None
+                self.attributes = []
+                self.predict = []
+    
+    def readFile(self, theFile):
+        try : 
+            with open(theFile, 'r') as infile:
+                attr = infile.readline().split()
+                self.attribute = attr
+                self.root = self.readTree(infile)
+        except IOError as ioe:
+            print("Error, please select another file")
+            os._exit(1)
 
+def readTree(self, infile):
+    val = infile.readline().strip()
+    if val[0] == '[':
+        return TreeNode(None, None, val[1:-1])
+    node = TreeNode(val, {}, None)
+    infile.read(1)
+    val = infile.readline().strip()
+    while val != ')':
+        node.child[val] = self.readTree(infile)
+        i = infile.readline().strip()
+    return node
 
-    pass
+def predictModel(self, testFile):
+    try:
+        self.predict = None
+        with open(testFile, 'r') as theFile:
+            for line in theFIle:
+                d = line.strip().split()[1:]
+                p = self.theTree(self.root, d)
+                self.predict.append(p)
+    except IOError as ioe:
+        print("Error reading test file: {e}")
+        ioe._exit(1)
+
+def theTree(self, node, data):
+    if node.value is not None:
+        return node.value
+    attr = node.attribute
+    val = data[self.attribute.index(attr)]
+    x = node.child[val]
+    return self.theTree(x, data)
+
+def thePredict(self, outFile):
+    try:
+        with open(outFile, 'w') as o:
+            for p in self.predict:
+                p.write(p + '\n')
+    except IOError as ioe:
+        print("Error writing to file: {e}")
+
+def runProgram(self, args):
+    if len(args) == 3:
+        self.readFile(args[1])
+        print("Success")
+        self.predictModel(args[0])
+        print("Predict complete")
+        self.thePredict(args[2])
+        print("Predictions saved")
+    else:
+        print("Please format: ")
+
+class TreeNode:
+    def __init__(self, atrr, ch, returnV):
+        self.attribute = atrr
+        self.child = ch
+        self.value = returnV
 
 
 def EvaDT(predictionLabel, realLabel, output):
